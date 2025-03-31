@@ -36,10 +36,15 @@ typedef int64_t int64;
 typedef uint64_t uint64;
 
 /// \brief Randomly generate an `int` in `[0, n)`.
-int Rand(int n) {
-  TK_ASSERT(n <= RAND_MAX,
+// 这里我修改了此随机函数，使得它可以生成min到max之间的任何整数
+int Rand(int min, int max) {
+  TK_ASSERT(max <= RAND_MAX,
             "`n` is too large to be handled by `Rand`, please implement your own random number generator");
-  return rand() % n;
+  int temp = 0;
+  while (temp < min) {
+    temp = rand() % max;
+  }
+  return temp;
 }
 
 /// \brief Randomly generate a `double` in `[0, 1)`.
