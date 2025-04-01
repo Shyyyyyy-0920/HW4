@@ -22,11 +22,11 @@ int main(void) {
   srand(time(NULL));
   //  Configure the game.
   config.fps = 30;
-  // config.mapSize = (Vec){Rand(7, 30), Rand(7, 30)};//随机地图大小
-  config.mapSize = (Vec){20, 20};
-  config.nEnemies = 1;
-  config.nSolids = 0;
-  config.nWalls = 0;
+  config.mapSize = (Vec){Rand(20, 40), Rand(20, 40)}; // 随机地图大小
+  // config.mapSize = (Vec){20, 20};
+  config.nEnemies = Rand(2, 5);
+  config.nSolids = Rand(2, 5);
+  config.nWalls = Rand(2, 5);
 
   // Run the game.
   GameLifecycle();
