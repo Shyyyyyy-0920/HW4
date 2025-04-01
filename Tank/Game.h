@@ -69,10 +69,7 @@ void GameInit(void) {
     if (judge3x3(pos)) { // 只能在空地上添加墙壁
       for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
-          Vec pos_copy = pos;
-          pos_copy.x = pos.x + i;
-          pos_copy.y = pos.y + j; // 设置为墙壁
-          map.flags[Idx(pos_copy)] = eFlagWall;
+          map.flags[Idx(Add(pos, (Vec){i, j}))] = eFlagWall;
         }
       }
     }
@@ -82,10 +79,7 @@ void GameInit(void) {
     if (judge3x3(pos)) { // 只能在空地上添加坚固物体
       for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
-          Vec pos_copy = pos;
-          pos_copy.x = pos.x + i;
-          pos_copy.y = pos.y + j;
-          map.flags[Idx(pos_copy)] = eFlagSolid; // 设置为墙壁
+          map.flags[Idx(Add(pos, (Vec){i, j}))] = eFlagSolid; // 设置为墙壁
         }
       }
     }
@@ -156,7 +150,7 @@ void GameUpdate(void) {
     Tank *tank = RegEntry(regTank, it);
     int randintIndex = rand() % 4; // 人机tank的四个方向移动
     // printf("%d\n", (int)RegSize(regTank)); // 输出当前tank的数量，便于调试
-    if ((game.keyHit == 'w' && tank->isPlayer) ||
+    if (((game.keyHit == 'w' || game.keyHit == 'W') && tank->isPlayer) ||
         (!tank->isPlayer && randintIndex == 0 && tank->canmove)) { // 玩家按w键向上移动或者人机tank向上移动
       tank->dir = eDirOP;                                          // 朝上
       if (!tank->isPlayer)                                         // 如果这是人机坦克，那么就不能运动了
@@ -166,7 +160,7 @@ void GameUpdate(void) {
           map.flags[Idx(tank->pos) + map.size.x - 1] != eFlagNone ||
           map.flags[Idx(tank->pos) + map.size.x + 1] != eFlagNone)
         --tank->pos.y;
-    } else if ((game.keyHit == 's' && tank->isPlayer) ||
+    } else if (((game.keyHit == 's' || game.keyHit == 'S') && tank->isPlayer) ||
                (!tank->isPlayer && randintIndex == 1 && tank->canmove)) { // 玩家按s键向下移动或者人机tank向下移动
       tank->dir = eDirON;                                                 // 朝下
       if (!tank->isPlayer)                                                // 如果这是人机坦克，那么就不能运动了
@@ -176,7 +170,7 @@ void GameUpdate(void) {
           map.flags[Idx(tank->pos) - map.size.x - 1] != eFlagNone ||
           map.flags[Idx(tank->pos) - map.size.x + 1] != eFlagNone)
         ++tank->pos.y;
-    } else if ((game.keyHit == 'a' && tank->isPlayer) ||
+    } else if (((game.keyHit == 'a' || game.keyHit == 'A') && tank->isPlayer) ||
                (!tank->isPlayer && randintIndex == 2 && tank->canmove)) { // 玩家按a键向左移动或者人机坦克想左移动
       tank->dir = eDirNO;                                                 // 朝左
       if (!tank->isPlayer)                                                // 如果这是人机坦克，那么就不能运动了
@@ -185,7 +179,7 @@ void GameUpdate(void) {
       if (map.flags[Idx(tank->pos) - 1] != eFlagNone || map.flags[Idx(tank->pos) - 1 - map.size.x] != eFlagNone ||
           map.flags[Idx(tank->pos) + map.size.x - 1] != eFlagNone)
         ++tank->pos.x;
-    } else if ((game.keyHit == 'd' && tank->isPlayer) ||
+    } else if (((game.keyHit == 'd' || game.keyHit == 'D') && tank->isPlayer) ||
                (!tank->isPlayer && randintIndex == 3 && tank->canmove)) { // 玩家按d键向右移动或者人机tank想右移动
       tank->dir = eDirPO;                                                 // 朝右
       if (!tank->isPlayer)                                                // 如果这是人机坦克，那么就不能运动了
@@ -195,7 +189,7 @@ void GameUpdate(void) {
           map.flags[Idx(tank->pos) + map.size.x + 1] != eFlagNone)
         --tank->pos.x;
     }
-    if ((game.keyHit == 'k' && tank->isPlayer) || (!tank->isPlayer && tank->canshoot)) {
+    if (((game.keyHit == 'k' || game.keyHit == 'K') && tank->isPlayer) || (!tank->isPlayer && tank->canshoot)) {
       { // 此为player坦克射出的子弹或者人机tank发出子弹
         Bullet *bullet = RegNew(regBullet);
         bullet->pos = tank->pos;

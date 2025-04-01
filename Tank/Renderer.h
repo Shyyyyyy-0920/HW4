@@ -100,46 +100,62 @@ void RdrClear(void) {
 
 /// @brief \brief Render a tank's appearance in the scene based on its direction and position.
 void Tankappr(int dir, Vec pos, Color color) {
-  if (dir == 1) {
-    RdrPutChar(Add(pos, (Vec){-1, -1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){-1, 1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){1, -1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){1, 1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){-1, 0}), '@', color);
-    RdrPutChar(Add(pos, (Vec){1, 0}), '@', color);
-    RdrPutChar(Add(pos, (Vec){0, 1}), 'X', color);
-    RdrPutChar(Add(pos, (Vec){0, 0}), 'O', color);
-    RdrPutChar(Add(pos, (Vec){0, -1}), '|', color);
+  if (dir == 7) { // 下
+    for (int i = -1; i <= 1; i++) {
+      for (int j = -1; j <= 1; j++) {
+        RdrPutChar(Add(pos, (Vec){i, j}), '@', color);
+        if (i == 0) {
+          if (j == 0)
+            RdrPutChar(Add(pos, (Vec){0, 0}), 'O', color);
+          else if (j == -1)
+            RdrPutChar(Add(pos, (Vec){0, -1}), 'X', color);
+          else if (j == 1)
+            RdrPutChar(Add(pos, (Vec){0, 1}), '|', color);
+        }
+      }
+    }
   } else if (dir == 3) {
-    RdrPutChar(Add(pos, (Vec){-1, -1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){-1, 1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){1, -1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){1, 1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){0, 1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){0, -1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){1, 0}), 'X', color);
-    RdrPutChar(Add(pos, (Vec){0, 0}), 'O', color);
-    RdrPutChar(Add(pos, (Vec){-1, 0}), '-', color);
+    for (int i = -1; i <= 1; i++) {
+      for (int j = -1; j <= 1; j++) {
+        RdrPutChar(Add(pos, (Vec){i, j}), '@', color);
+        if (j == 0) {
+          if (i == 0)
+            RdrPutChar(Add(pos, (Vec){0, 0}), 'O', color);
+          else if (i == -1)
+            RdrPutChar(Add(pos, (Vec){-1, 0}), '-', color);
+          else if (i == 1)
+            RdrPutChar(Add(pos, (Vec){1, 0}), 'X', color);
+        }
+      }
+    }
   } else if (dir == 5) {
-    RdrPutChar(Add(pos, (Vec){-1, -1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){-1, 1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){1, -1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){1, 1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){0, 1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){0, -1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){-1, 0}), 'X', color);
-    RdrPutChar(Add(pos, (Vec){0, 0}), 'O', color);
-    RdrPutChar(Add(pos, (Vec){1, 0}), '-', color);
-  } else if (dir == 7) {
-    RdrPutChar(Add(pos, (Vec){-1, -1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){-1, 1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){1, -1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){1, 1}), '@', color);
-    RdrPutChar(Add(pos, (Vec){-1, 0}), '@', color);
-    RdrPutChar(Add(pos, (Vec){1, 0}), '@', color);
-    RdrPutChar(Add(pos, (Vec){0, -1}), 'X', color);
-    RdrPutChar(Add(pos, (Vec){0, 0}), 'O', color);
-    RdrPutChar(Add(pos, (Vec){0, 1}), '|', color);
+    for (int i = -1; i <= 1; i++) {
+      for (int j = -1; j <= 1; j++) {
+        RdrPutChar(Add(pos, (Vec){i, j}), '@', color);
+        if (j == 0) {
+          if (i == 0)
+            RdrPutChar(Add(pos, (Vec){0, 0}), 'O', color);
+          else if (i == -1)
+            RdrPutChar(Add(pos, (Vec){-1, 0}), 'X', color);
+          else if (i == 1)
+            RdrPutChar(Add(pos, (Vec){1, 0}), '-', color);
+        }
+      }
+    }
+  } else if (dir == 1) { // 上
+    for (int i = -1; i <= 1; i++) {
+      for (int j = -1; j <= 1; j++) {
+        RdrPutChar(Add(pos, (Vec){i, j}), '@', color);
+        if (i == 0) {
+          if (j == 0)
+            RdrPutChar(Add(pos, (Vec){0, 0}), 'O', color);
+          else if (j == 1)
+            RdrPutChar(Add(pos, (Vec){0, 1}), 'X', color);
+          else if (j == -1)
+            RdrPutChar(Add(pos, (Vec){0, -1}), '|', color);
+        }
+      }
+    }
   }
 }
 
