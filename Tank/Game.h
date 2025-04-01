@@ -64,18 +64,32 @@ void GameInit(void) {
 
       map.flags[Idx(pos)] = flag; // 其他地方都是空地
     }
-  // for (int i = 0; i < nWalls; i++) { // 随机添加墙壁，数量由config.nWalls决定
-  //   Vec pos = RandVec(map.size);
-  //   if (map.flags[Idx(pos)] == eFlagNone) { // 只能在空地上添加墙壁
-  //     map.flags[Idx(pos)] = eFlagWall;      // 设置为墙壁
-  //   }
-  // }
-  // for (int i = 0; i < nSolids; i++) { // 随机添加坚固物体，数量由config.nSolids决定
-  //   Vec pos = RandVec(map.size);
-  //   if (map.flags[Idx(pos)] == eFlagNone) { // 只能在空地上添加坚固物体
-  //     map.flags[Idx(pos)] = eFlagSolid;     // 设置为坚固物体
-  //   }
-  // }
+  for (int i = 0; i < nWalls; i++) { // 随机添加墙壁，数量由config.nWalls决定
+    Vec pos = RandPos();
+    if (judge3x3(pos)) { // 只能在空地上添加墙壁
+      for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+          Vec pos_copy = pos;
+          pos_copy.x = pos.x + i;
+          pos_copy.y = pos.y + j; // 设置为墙壁
+          map.flags[Idx(pos_copy)] = eFlagWall;
+        }
+      }
+    }
+  }
+  for (int i = 0; i < nSolids; i++) { // 随机添加坚固物体，数量由config.nSolids决定
+    Vec pos = RandPos();
+    if (judge3x3(pos)) { // 只能在空地上添加坚固物体
+      for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+          Vec pos_copy = pos;
+          pos_copy.x = pos.x + i;
+          pos_copy.y = pos.y + j;
+          map.flags[Idx(pos_copy)] = eFlagSolid; // 设置为墙壁
+        }
+      }
+    }
+  }
   { // 此为玩家操控的tank
     Tank *tank = RegNew(regTank);
     tank->pos = (Vec){6, 2}; // 玩家坦克的初始位置，(x, y) 代表第x列第y行
@@ -134,22 +148,28 @@ void GameUpdate(void) {
     if (game.keyHit == 'w' && tank->isPlayer) { // 玩家按w键向上移动
       tank->dir = eDirOP;                       // 朝上
       ++tank->pos.y;
-      if (map.flags[Idx(tank->pos) + map.size.x] != ' ')
+      if (map.flags[Idx(tank->pos) + map.size.x] != eFlagNone ||
+          map.flags[Idx(tank->pos) + map.size.x - 1] != eFlagNone ||
+          map.flags[Idx(tank->pos) + map.size.x + 1] != eFlagNone)
         --tank->pos.y;
     } else if (game.keyHit == 's' && tank->isPlayer) { // 玩家按s键向下移动
       tank->dir = eDirON;                              // 朝下
       --tank->pos.y;
-      if (map.flags[Idx(tank->pos) - map.size.x] != ' ')
+      if (map.flags[Idx(tank->pos) - map.size.x] != eFlagNone ||
+          map.flags[Idx(tank->pos) - map.size.x - 1] != eFlagNone ||
+          map.flags[Idx(tank->pos) - map.size.x + 1] != eFlagNone)
         ++tank->pos.y;
     } else if (game.keyHit == 'a' && tank->isPlayer) { // 玩家按a键向左移动
       tank->dir = eDirNO;                              // 朝左
       --tank->pos.x;
-      if (map.flags[Idx(tank->pos) - 1] != ' ')
+      if (map.flags[Idx(tank->pos) - 1] != eFlagNone || map.flags[Idx(tank->pos) - 1 - map.size.x] != eFlagNone ||
+          map.flags[Idx(tank->pos) + map.size.x - 1] != eFlagNone)
         ++tank->pos.x;
     } else if (game.keyHit == 'd' && tank->isPlayer) { // 玩家按d键向右移动
       tank->dir = eDirPO;                              // 朝右
       ++tank->pos.x;
-      if (map.flags[Idx(tank->pos) + 1] != ' ')
+      if (map.flags[Idx(tank->pos) + 1] != eFlagNone || map.flags[Idx(tank->pos) + 1 - map.size.x] != eFlagNone ||
+          map.flags[Idx(tank->pos) + map.size.x + 1] != eFlagNone)
         --tank->pos.x;
     }
     if (game.keyHit == 'k' && tank->isPlayer) {
@@ -160,13 +180,13 @@ void GameUpdate(void) {
         bullet->color = TK_BLUE;
         bullet->isPlayer = true;
         if (bullet->dir == eDirOP) // 上
-          bullet->pos.y += 2;
+          bullet->pos.y += 1;
         else if (bullet->dir == eDirON) // 下
-          bullet->pos.y -= 2;
+          bullet->pos.y -= 1;
         else if (bullet->dir == eDirNO) // 左
-          bullet->pos.x -= 2;
+          bullet->pos.x -= 1;
         else if (bullet->dir == eDirPO) // 右
-          bullet->pos.x += 2;
+          bullet->pos.x += 1;
       }
     }
   }
