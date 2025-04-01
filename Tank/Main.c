@@ -26,7 +26,7 @@ int main(void) {
   config.mapSize = (Vec){20, 20};
   config.nEnemies = 0;
   config.nSolids = 1;
-  config.nWalls = 0;
+  config.nWalls = 1;
 
   // Run the game.
   GameLifecycle();

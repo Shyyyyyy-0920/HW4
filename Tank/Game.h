@@ -144,7 +144,6 @@ void GameUpdate(void) {
   for (RegIterator it = RegBegin(regTank); it != RegEnd(regTank); it = RegNext(it)) {
     Tank *tank = RegEntry(regTank, it);
     // printf("%d\n", (int)RegSize(regTank)); // 输出当前tank的数量，便于调试
-    //  printf("x:%d y:%d", tank->pos.x, tank->pos.y);
     if (game.keyHit == 'w' && tank->isPlayer) { // 玩家按w键向上移动
       tank->dir = eDirOP;                       // 朝上
       ++tank->pos.y;
@@ -202,7 +201,11 @@ void GameUpdate(void) {
     } else if (bullet->dir == eDirPO) {
       ++bullet->pos.x;
     }
-    if (map.flags[Idx(bullet->pos)] != ' ') {
+    if (map.flags[Idx(bullet->pos)] != eFlagNone) {
+      if (map.flags[Idx(bullet->pos)] == eFlagWall) {
+        map.flags[Idx(bullet->pos)] = eFlagNone;
+        RdrClear();
+      }
       RegDelete(bullet);
     }
   }
