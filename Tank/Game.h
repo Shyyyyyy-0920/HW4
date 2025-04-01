@@ -95,12 +95,12 @@ void GameInit(void) {
   }
   { // 此为敌人tank
     Tank *tank_enemy = RegNew(regTank);
-    tank_enemy->pos = (Vec){6, 2}; // 玩家坦克的初始位置，(x, y) 代表第x列第y行
-    tank_enemy->dir = eDirPO;      // 初始运动方向
-    tank_enemy->color = TK_RED;    // 玩家坦克的颜色，绿色
-    tank_enemy->isPlayer = false;  // 是否为玩家坦克，true代表玩家坦克
-    tank_enemy->canmove = true;    // 用于鉴定此此能否移动
-    tank_enemy->canshoot = true;   // 用于人机的间隔开火
+    tank_enemy->pos = (Vec){10, 12}; // 玩家坦克的初始位置，(x, y) 代表第x列第y行
+    tank_enemy->dir = eDirPO;        // 初始运动方向
+    tank_enemy->color = TK_RED;      // 玩家坦克的颜色，绿色
+    tank_enemy->isPlayer = false;    // 是否为玩家坦克，true代表玩家坦克
+    tank_enemy->canmove = true;      // 用于鉴定此此能否移动
+    tank_enemy->canshoot = true;     // 用于人机的间隔开火
   }
   // Initialize renderer.
   renderer.csPrev = (char *)malloc(sizeof(char) * map.size.x * map.size.y);
@@ -143,11 +143,17 @@ void GameInput(void) {
 /// \note This function should be called in the loop of `GameLifecycle` after `GameInput`.
 void GameUpdate(void) {
   RdrClear();
-
   // TODO: You may need to delete or add codes here.
   // 这里目前是更新tank(不管是玩家还是人机)的移动方向
   for (RegIterator it = RegBegin(regTank); it != RegEnd(regTank); it = RegNext(it)) {
     Tank *tank = RegEntry(regTank, it);
+    // 先把更新前的tank位置给恢复了
+    for (int i = -1; i <= 1; i++) {
+      for (int j = -1; j <= 1; j++) {
+        map.flags[Idx(Add(tank->pos, (Vec){i, j}))] = eFlagNone;
+        RdrClear(); // 这个非常重要，否则无法删除之前画的东西！！！！（吸取教训）
+      }
+    }
     int randintIndex = rand() % 4; // 人机tank的四个方向移动
     // printf("%d\n", (int)RegSize(regTank)); // 输出当前tank的数量，便于调试
     if (((game.keyHit == 'w' || game.keyHit == 'W') && tank->isPlayer) ||
@@ -159,7 +165,7 @@ void GameUpdate(void) {
       if (map.flags[Idx(tank->pos) + map.size.x] != eFlagNone ||
           map.flags[Idx(tank->pos) + map.size.x - 1] != eFlagNone ||
           map.flags[Idx(tank->pos) + map.size.x + 1] != eFlagNone)
-        --tank->pos.y;
+        --tank->pos.y; // 障碍物判定
     } else if (((game.keyHit == 's' || game.keyHit == 'S') && tank->isPlayer) ||
                (!tank->isPlayer && randintIndex == 1 && tank->canmove)) { // 玩家按s键向下移动或者人机tank向下移动
       tank->dir = eDirON;                                                 // 朝下
@@ -212,6 +218,12 @@ void GameUpdate(void) {
           bullet->pos.x += 1;
       }
     }
+    // 试一下把更新后tank的位置周围打上标记
+    for (int i = -1; i <= 1; i++) {
+      for (int j = -1; j <= 1; j++) {
+        map.flags[Idx(Add(tank->pos, (Vec){i, j}))] = eFlagTank;
+      }
+    }
   }
   // 接下来写子弹的更新逻辑
   for (RegIterator it = RegBegin(regBullet); it != RegEnd(regBullet); it = RegNext(it)) {
@@ -229,7 +241,37 @@ void GameUpdate(void) {
       if (map.flags[Idx(bullet->pos)] == eFlagWall) {
         map.flags[Idx(bullet->pos)] = eFlagNone;
         RdrClear();
+      } else if (map.flags[Idx(bullet->pos)] == eFlagTank) {
+        // 这里写消灭坦克的逻辑，要保证只要击中t，那么这一块坦克就消失了
+        Vec flag_pos = {0, 0};
+        for (RegIterator it = RegBegin(regTank); it != RegEnd(regTank); it = RegNext(it)) { // 先枚举所有tank类
+          Tank *tank = RegEntry(regTank, it);
+          for (int i = -1; i <= 1; i++) {
+            for (
+                int j = -1; j <= 1;
+                j++) { // 判断以那个tank中心的pos周围九格是否存在与子弹pos重合的，要是有，那么需要把那一块变为空地，并且
+                       // 还要把tank和子弹从tank类里删除
+              if (Eq(Add(tank->pos, (Vec){i, j}), bullet->pos)) {
+                map.flags[Idx(tank->pos)] = eFlagNone;
+                RdrClear();
+                RegDelete(tank);
+                flag_pos = tank->pos;
+                break;
+              }
+            }
+          }
+          if (flag_pos.x != 0 && flag_pos.y != 0) {
+            for (int i = -1; i <= 1; i++) {
+              for (int j = -1; j <= 1; j++) {
+                map.flags[Idx(Add(tank->pos, (Vec){i, j}))] = eFlagNone; // 删去这个周围的所有T标志物
+                RdrClear();
+              }
+            }
+            flag_pos = (Vec){0, 0}; // 重新归位
+          }
+        }
       }
+      // 上面是消灭tank的逻辑
       RegDelete(bullet);
     }
   }
