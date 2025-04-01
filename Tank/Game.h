@@ -156,7 +156,6 @@ void GameUpdate(void) {
       }
     }
     int randintIndex = rand() % 4; // 人机tank的四个方向移动
-    // printf("%d\n", (int)RegSize(regTank)); // 输出当前tank的数量，便于调试
     if (((game.keyHit == 'w' || game.keyHit == 'W') && tank->isPlayer) ||
         (!tank->isPlayer && randintIndex == 0 && tank->canmove)) { // 玩家按w键向上移动或者人机tank向上移动
       tank->dir = eDirOP;                                          // 朝上
@@ -196,7 +195,8 @@ void GameUpdate(void) {
           map.flags[Idx(tank->pos) + map.size.x + 1] != eFlagNone)
         --tank->pos.x;
     }
-    if (((game.keyHit == 'k' || game.keyHit == 'K') && tank->isPlayer) || (!tank->isPlayer && tank->canshoot)) {
+    if (((game.keyHit == 'k' || game.keyHit == 'K') && tank->isPlayer && tank->canshoot) ||
+        (!tank->isPlayer && tank->canshoot)) {
       { // 此为player坦克射出的子弹或者人机tank发出子弹
         Bullet *bullet = RegNew(regBullet);
         bullet->pos = tank->pos;
@@ -204,6 +204,7 @@ void GameUpdate(void) {
         if (tank->isPlayer) {
           bullet->color = TK_BLUE;
           bullet->isPlayer = true;
+          tank->canshoot = false; // 一发子弹过后禁止射击了
         } else {
           bullet->color = TK_RED;
           bullet->isPlayer = false;
@@ -219,7 +220,7 @@ void GameUpdate(void) {
           bullet->pos.x += 1;
       }
     }
-    // 试一下把更新后tank的位置周围打上标记
+    // 把更新后tank的位置周围打上标记
     for (int i = -1; i <= 1; i++) {
       for (int j = -1; j <= 1; j++) {
         map.flags[Idx(Add(tank->pos, (Vec){i, j}))] = eFlagTank;
@@ -333,10 +334,10 @@ void GameLifecycle(void) {
     if ((double)(clock() - aitank_move_begin) > 600) {
       for (RegIterator it = RegBegin(regTank); it != RegEnd(regTank); it = RegNext(it)) {
         Tank *tank = RegEntry(regTank, it);
-        if (!tank->isPlayer) {
-          tank->canmove = true;  // 允许运动
-          tank->canshoot = true; // 允许射击
-        }
+        // if (!tank->isPlayer) {
+        tank->canmove = true;  // 允许运动
+        tank->canshoot = true; // 允许射击
+        //}
       }
       aitank_move_begin = clock();
     }
