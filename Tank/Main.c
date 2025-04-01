@@ -24,9 +24,9 @@ int main(void) {
   config.fps = 30;
   // config.mapSize = (Vec){Rand(7, 30), Rand(7, 30)};//随机地图大小
   config.mapSize = (Vec){20, 20};
-  config.nEnemies = 0;
-  config.nSolids = 1;
-  config.nWalls = 1;
+  config.nEnemies = 1;
+  config.nSolids = 0;
+  config.nWalls = 0;
 
   // Run the game.
   GameLifecycle();

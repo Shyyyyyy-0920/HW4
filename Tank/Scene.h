@@ -62,6 +62,8 @@ typedef struct {
   Dir dir;       // Direction.
   Color color;   // Color of the tank and its bullets.
   bool isPlayer; // Whether this tank is player or enemy.
+  bool canmove;  // 新增加，用于控制人机tank一次只能行动一次
+  bool canshoot; // 新增加，用于控制人机tank一次只能射一发子弹
 } Tank;
 
 /// \example It is easy to create or delete a `Bullet` with the help of registries, see `Registry.h`.

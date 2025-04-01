@@ -92,10 +92,21 @@ void GameInit(void) {
   }
   { // 此为玩家操控的tank
     Tank *tank = RegNew(regTank);
-    tank->pos = (Vec){6, 2}; // 玩家坦克的初始位置，(x, y) 代表第x列第y行
+    tank->pos = (Vec){2, 2}; // 玩家坦克的初始位置，(x, y) 代表第x列第y行
     tank->dir = eDirPO;      // 初始运动方向
     tank->color = TK_GREEN;  // 玩家坦克的颜色，绿色
     tank->isPlayer = true;   // 是否为玩家坦克，true代表玩家坦克
+    tank->canmove = true;    // 用于鉴定此此能否移动
+    tank->canshoot = true;   // 用于人机的间隔开火
+  }
+  { // 此为敌人tank
+    Tank *tank_enemy = RegNew(regTank);
+    tank_enemy->pos = (Vec){6, 2}; // 玩家坦克的初始位置，(x, y) 代表第x列第y行
+    tank_enemy->dir = eDirPO;      // 初始运动方向
+    tank_enemy->color = TK_RED;    // 玩家坦克的颜色，绿色
+    tank_enemy->isPlayer = false;  // 是否为玩家坦克，true代表玩家坦克
+    tank_enemy->canmove = true;    // 用于鉴定此此能否移动
+    tank_enemy->canshoot = true;   // 用于人机的间隔开火
   }
   // Initialize renderer.
   renderer.csPrev = (char *)malloc(sizeof(char) * map.size.x * map.size.y);
@@ -140,44 +151,63 @@ void GameUpdate(void) {
   RdrClear();
 
   // TODO: You may need to delete or add codes here.
-  // 这里目前是更新tank的移动方向
+  // 这里目前是更新tank(不管是玩家还是人机)的移动方向
   for (RegIterator it = RegBegin(regTank); it != RegEnd(regTank); it = RegNext(it)) {
     Tank *tank = RegEntry(regTank, it);
+    int randintIndex = rand() % 4; // 人机tank的四个方向移动
     // printf("%d\n", (int)RegSize(regTank)); // 输出当前tank的数量，便于调试
-    if (game.keyHit == 'w' && tank->isPlayer) { // 玩家按w键向上移动
-      tank->dir = eDirOP;                       // 朝上
+    if ((game.keyHit == 'w' && tank->isPlayer) ||
+        (!tank->isPlayer && randintIndex == 0 && tank->canmove)) { // 玩家按w键向上移动或者人机tank向上移动
+      tank->dir = eDirOP;                                          // 朝上
+      if (!tank->isPlayer)                                         // 如果这是人机坦克，那么就不能运动了
+        tank->canmove = false;
       ++tank->pos.y;
       if (map.flags[Idx(tank->pos) + map.size.x] != eFlagNone ||
           map.flags[Idx(tank->pos) + map.size.x - 1] != eFlagNone ||
           map.flags[Idx(tank->pos) + map.size.x + 1] != eFlagNone)
         --tank->pos.y;
-    } else if (game.keyHit == 's' && tank->isPlayer) { // 玩家按s键向下移动
-      tank->dir = eDirON;                              // 朝下
+    } else if ((game.keyHit == 's' && tank->isPlayer) ||
+               (!tank->isPlayer && randintIndex == 1 && tank->canmove)) { // 玩家按s键向下移动或者人机tank向下移动
+      tank->dir = eDirON;                                                 // 朝下
+      if (!tank->isPlayer)                                                // 如果这是人机坦克，那么就不能运动了
+        tank->canmove = false;
       --tank->pos.y;
       if (map.flags[Idx(tank->pos) - map.size.x] != eFlagNone ||
           map.flags[Idx(tank->pos) - map.size.x - 1] != eFlagNone ||
           map.flags[Idx(tank->pos) - map.size.x + 1] != eFlagNone)
         ++tank->pos.y;
-    } else if (game.keyHit == 'a' && tank->isPlayer) { // 玩家按a键向左移动
-      tank->dir = eDirNO;                              // 朝左
+    } else if ((game.keyHit == 'a' && tank->isPlayer) ||
+               (!tank->isPlayer && randintIndex == 2 && tank->canmove)) { // 玩家按a键向左移动或者人机坦克想左移动
+      tank->dir = eDirNO;                                                 // 朝左
+      if (!tank->isPlayer)                                                // 如果这是人机坦克，那么就不能运动了
+        tank->canmove = false;
       --tank->pos.x;
       if (map.flags[Idx(tank->pos) - 1] != eFlagNone || map.flags[Idx(tank->pos) - 1 - map.size.x] != eFlagNone ||
           map.flags[Idx(tank->pos) + map.size.x - 1] != eFlagNone)
         ++tank->pos.x;
-    } else if (game.keyHit == 'd' && tank->isPlayer) { // 玩家按d键向右移动
-      tank->dir = eDirPO;                              // 朝右
+    } else if ((game.keyHit == 'd' && tank->isPlayer) ||
+               (!tank->isPlayer && randintIndex == 3 && tank->canmove)) { // 玩家按d键向右移动或者人机tank想右移动
+      tank->dir = eDirPO;                                                 // 朝右
+      if (!tank->isPlayer)                                                // 如果这是人机坦克，那么就不能运动了
+        tank->canmove = false;
       ++tank->pos.x;
       if (map.flags[Idx(tank->pos) + 1] != eFlagNone || map.flags[Idx(tank->pos) + 1 - map.size.x] != eFlagNone ||
           map.flags[Idx(tank->pos) + map.size.x + 1] != eFlagNone)
         --tank->pos.x;
     }
-    if (game.keyHit == 'k' && tank->isPlayer) {
-      { // 此为player坦克射出的子弹
+    if ((game.keyHit == 'k' && tank->isPlayer) || (!tank->isPlayer && tank->canshoot)) {
+      { // 此为player坦克射出的子弹或者人机tank发出子弹
         Bullet *bullet = RegNew(regBullet);
         bullet->pos = tank->pos;
         bullet->dir = tank->dir;
-        bullet->color = TK_BLUE;
-        bullet->isPlayer = true;
+        if (tank->isPlayer) {
+          bullet->color = TK_BLUE;
+          bullet->isPlayer = true;
+        } else {
+          bullet->color = TK_RED;
+          bullet->isPlayer = false;
+          tank->canshoot = false; // 一发子弹过后禁止射击了
+        }
         if (bullet->dir == eDirOP) // 上
           bullet->pos.y += 1;
         else if (bullet->dir == eDirON) // 下
@@ -201,7 +231,7 @@ void GameUpdate(void) {
     } else if (bullet->dir == eDirPO) {
       ++bullet->pos.x;
     }
-    if (map.flags[Idx(bullet->pos)] != eFlagNone) {
+    if (map.flags[Idx(bullet->pos)] != eFlagNone) { // 做子弹碰撞消失的判断，同时可以消灭可消灭物
       if (map.flags[Idx(bullet->pos)] == eFlagWall) {
         map.flags[Idx(bullet->pos)] = eFlagNone;
         RdrClear();
@@ -248,7 +278,7 @@ void GameLifecycle(void) {
 
   double frameTime = (double)1000 / (double)config.fps; // 帧率，每帧的时间间隔，单位为毫秒
   clock_t frameBegin = clock();                         // 记录程序开始运行时间
-
+  clock_t aitank_move_begin = clock();
   while (true) {
     // printf(TK_TEXT("Hello World%c\n", TK_YELLOW), '!');
 
@@ -261,7 +291,17 @@ void GameLifecycle(void) {
     while (((double)(clock() - frameBegin) / CLOCKS_PER_SEC) * 1000.0 < frameTime - 0.5)
       Daze();
     frameBegin = clock();
+    // 最后要将人机tank的canmove恢复
+    if ((double)(clock() - aitank_move_begin) > 600) {
+      for (RegIterator it = RegBegin(regTank); it != RegEnd(regTank); it = RegNext(it)) {
+        Tank *tank = RegEntry(regTank, it);
+        if (!tank->isPlayer) {
+          tank->canmove = true;  // 允许运动
+          tank->canshoot = true; // 允许射击
+        }
+      }
+      aitank_move_begin = clock();
+    }
   }
-
   GameTerminate();
 }
