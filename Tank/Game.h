@@ -66,6 +66,9 @@ void GameInit(void) {
     }
   for (int i = 0; i < nWalls; i++) { // 随机添加墙壁，数量由config.nWalls决定
     Vec pos = RandPos();
+    while (pos.x < 4 && pos.y < 4) {
+      pos = RandPos();
+    }
     if (judge3x3(pos)) { // 只能在空地上添加墙壁
       for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
@@ -76,6 +79,9 @@ void GameInit(void) {
   }
   for (int i = 0; i < nSolids; i++) { // 随机添加坚固物体，数量由config.nSolids决定
     Vec pos = RandPos();
+    while (pos.x < 4 && pos.y < 4) {
+      pos = RandPos();
+    }
     if (judge3x3(pos)) { // 只能在空地上添加坚固物体
       for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
@@ -97,11 +103,15 @@ void GameInit(void) {
     Tank *tank_enemy = RegNew(regTank);
     tank_enemy->pos =
         (Vec){Rand(3, map.size.x - 3), Rand(3, map.size.y - 3)}; // 玩家坦克的初始位置，(x, y) 代表第x列第y行
-    tank_enemy->dir = eDirPO;                                    // 初始运动方向
-    tank_enemy->color = TK_RED;                                  // 玩家坦克的颜色，绿色
-    tank_enemy->isPlayer = false;                                // 是否为玩家坦克，true代表玩家坦克
-    tank_enemy->canmove = true;                                  // 用于鉴定此此能否移动
-    tank_enemy->canshoot = true;                                 // 用于人机的间隔开火
+    if (judge3x3(tank_enemy->pos)) {                             // 只能在空地上添加敌人坦克
+      tank_enemy->dir = eDirPO;                                  // 初始运动方向
+      tank_enemy->color = TK_RED;                                // 玩家坦克的颜色，绿色
+      tank_enemy->isPlayer = false;                              // 是否为玩家坦克，true代表玩家坦克
+      tank_enemy->canmove = true;                                // 用于鉴定此此能否移动
+      tank_enemy->canshoot = true;                               // 用于人机的间隔开火
+    } else {
+      RegDelete(tank_enemy); // 不是空地就删去
+    }
   }
   // Initialize renderer.
   renderer.csPrev = (char *)malloc(sizeof(char) * map.size.x * map.size.y);

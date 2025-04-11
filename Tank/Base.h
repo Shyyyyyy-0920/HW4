@@ -2,7 +2,7 @@
 
 /// \file
 /// \brief This file contains the most basic utilities.
-// Rand函数的作用是随机生成一个整数，范围在[0,n)之间，用法是Rand(n).
+// 新增加，我对Rand函数进行了改写，Rand函数的作用是随机生成一个整数，范围在[min,max)之间，用法是Rand(min,max).
 // Rand01函数的作用是随机生成一个double类型的数，范围在[0,1)之间，用法是Rand01().
 // vec结构体是一个二维向量，包含两个整数x和y，提供了一些常用的操作函数，如Eq, Neq, Add, Sub, Mul等.
 // Eq函数用于判断两个Vec是否相等，Neq函数用于判断两个Vec是否不相等.

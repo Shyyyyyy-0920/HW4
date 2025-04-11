@@ -98,7 +98,7 @@ void RdrClear(void) {
   }
 }
 
-/// @brief \brief Render a tank's appearance in the scene based on its direction and position.
+/// \brief 按照不同位置不同方向来绘制坦克，需要接受这个坦克的方向，中心位置和这个坦克颜色
 void Tankappr(int dir, Vec pos, Color color) {
   if (dir == 7) { // 下
     for (int i = -1; i <= 1; i++) {

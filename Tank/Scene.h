@@ -5,7 +5,6 @@
 // MoveCursor函数用来移动光标到指定的位置
 // RandPos函数用来随机生成一个在地图范围内的位置
 // 新增一个函数，只需要传入中心点坐标，即可判断周围3x3范围内是否都是空地，如果是就返回1，否则就返回0
-// 新增一个函数，用于检测碰撞判断，传入两个物体（非子弹）的坐标，进行碰撞判定,如果碰撞就返回1，否则就返回0
 /// \file
 /// \brief This file contains the definitions, singletons, and functions of
 /// the game-related types, such as `Tank`, `Bullet`, and `Map`.
